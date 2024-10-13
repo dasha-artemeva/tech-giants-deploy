@@ -1,0 +1,6 @@
+[submodule "tech-giants-frontend"]
+	path = tech-giants-frontend
+	url = git@github.com:dasha-artemeva/tech-giants-frontend.git
+[submodule "tech-giants-backend"]
+	path = tech-giants-backend
+	url = git@github.com:dasha-artemeva/tech-giants-backend.git

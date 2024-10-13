@@ -1,0 +1,51 @@
+version: '3.8'
+services: 
+  backend:
+    build: 
+      context: './tech-giants-backend/'
+
+    depends_on:
+      - postgresql
+
+    environment:
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_HOST: postgresql
+      DATABASE_PORT: 5432
+      SECRET_KEY: ${SECRET_KEY}
+      DJANGO_SETTINGS_MODULE: system.settings.default
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+      CORS_ORIGIN_WHITELIST: ${CORS_ORIGIN_WHITELIST}
+      PORT: 80
+
+  frontend:
+    build: 
+      context: './tech-giants-frontend/'
+
+  proxy:
+    build: '.'
+    ports:
+      - '80:80'
+    depends_on:
+      - backend
+      - frontend
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.http.routers.proxy.rule=Host(`conference.techgiants.ru`)'
+      - 'traefik.http.routers.proxy.service=proxy'
+      - 'traefik.http.services.proxy.loadbalancer.server.port=80'
+      - 'traefik.http.routers.proxy.entrypoints=http'
+
+  postgresql:
+    image: postgres:16.4-bullseye
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+
+    healthcheck:
+      test: pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}
+      interval: 10s
+      timeout: 3s
+      retries: 3
